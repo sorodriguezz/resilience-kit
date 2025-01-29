@@ -1,30 +1,53 @@
-# NestJS Resilience Lib
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-Una librería para **NestJS** que implementa patrones de **resiliencia** (Circuit Breaker, Retry, Timeout, Fallback, etc.) de forma sencilla y configurable.
+<p align="center">
+    <a href='https://img.shields.io/npm/l/nestjs-resilience'><img src="https://img.shields.io/npm/l/nestjs-resilience" alt="MIT License" /></a>
+</p>
 
-## Características
+**NestJS Resilience** proporciona **patrones de resiliencia** como Circuit Breaker, Retry, Timeout y Fallback para **NestJS** (y Node.js). Permite configurar y aplicar estos patrones de forma sencilla mediante **interceptores**, **decoradores** y un **módulo dinámico**.
 
-- **Circuit Breaker**: Evita colapsos cuando un servicio externo falla repetidamente.
-- **Retry**: Reintenta una operación en caso de error.
-- **Timeout**: Cancela solicitudes que tarden demasiado tiempo en completarse.
-- **Fallback**: Proporciona un resultado alternativo cuando una operación falla.
-- **Configuración centralizada**: Gracias a un módulo dinámico y el uso de `RESILIENCE_OPTIONS`.
-- **Decoradores e Interceptores**: Integración sencilla y “al estilo NestJS” mediante `@UseCircuitBreaker()`, `@UseRetry()`, `@UseTimeout()`, `@UseFallback()`.
+## 🚀 Características principales
 
-## Instalación
+✅ **Circuit Breaker**: Protege tu aplicación de fallos repetitivos o servicios inestables.  
+✅ **Retry**: Reintenta automáticamente una operación fallida.  
+✅ **Timeout**: Detiene las operaciones que toman demasiado tiempo.  
+✅ **Fallback**: Devuelve una respuesta alternativa cuando una operación falla.  
+✅ **Configuración dinámica**: Usa `ResilienceModule.forRoot()` o `forRootAsync()`.  
+✅ **Decoradores e Interceptores**: Integración sencilla con NestJS (`@UseCircuitBreaker()`, `@UseRetry()`, etc.).  
+✅ **Encadenamiento de patrones**: Aplica múltiples patrones en un solo endpoint.
+
+---
+
+## 📦 Instalación
 
 ```bash
-npm install nestjs-resilience-lib
-# o
-yarn add nestjs-resilience-lib
+npm install nestjs-resilience
 ```
 
-## Uso básico
+O usando Yarn:
 
-1.	Importa el ResilienceModule en tu AppModule (o donde necesites):
+```bash
+yarn add nestjs-resilience
+```
+
+### Requisitos
+
+- NestJS (v9 o superior recomendado).
+- Node.js 16+ (para soporte de ES2020).
+
+---
+
+## 📌 Uso básico en NestJS
+
+### 1️⃣ Importar el módulo
+
+En tu `AppModule` (o el módulo donde lo necesites), importa `ResilienceModule` y configura los patrones deseados:
+
 ```typescript
-import { Module } from '@nestjs/common';
-import { ResilienceModule } from 'nestjs-resilience-lib';
+import { Module } from "@nestjs/common";
+import { ResilienceModule } from "nestjs-resilience";
 
 @Module({
   imports: [
@@ -46,134 +69,149 @@ import { ResilienceModule } from 'nestjs-resilience-lib';
       },
       fallback: {
         enabled: true,
-        fallbackMethod: () => ({ message: 'Fallback result' }),
+        fallbackMethod: () => ({ message: "Fallback result" }),
       },
     }),
   ],
 })
 export class AppModule {}
-
 ```
 
-Nota: También existe forRootAsync() para cargar la configuración de manera asíncrona (por ejemplo, desde un microservicio de configuración o variables de entorno).
+Si necesitas cargar la configuración de forma asíncrona, usa `forRootAsync()`:
 
-2.	Usa los decoradores en tus controladores o métodos:
+```typescript
+ResilienceModule.forRootAsync({
+  useFactory: async () => ({
+    circuitBreaker: { enabled: true, timeout: 2000 },
+    retry: { enabled: true, maxRetries: 5 },
+  }),
+});
+```
 
-import { Controller, Get } from '@nestjs/common';
+---
+
+### 2️⃣ Aplicar decoradores en los endpoints
+
+Puedes usar los decoradores que provee la librería en tus controladores de NestJS:
+
+```typescript
+import { Controller, Get } from "@nestjs/common";
 import {
   UseCircuitBreaker,
   UseRetry,
   UseTimeout,
   UseFallback,
-} from 'nestjs-resilience-lib';
+} from "nestjs-resilience";
 
-@Controller('test')
-export class TestController {
-  @Get('circuit')
-  @UseCircuitBreaker()
-  testCircuitBreaker() {
-    // Lógica que podría fallar
-    return { data: 'Circuit Breaker endpoint' };
-  }
-
-  @Get('retry')
+@Controller("demo")
+export class DemoController {
+  @Get("retry")
   @UseRetry()
-  testRetry() {
-    // Se reintentará si falla
-    return { data: 'Retry endpoint' };
+  getWithRetry() {
+    throw new Error("Forzando error para reintento");
   }
 
-  @Get('timeout')
+  @Get("timeout")
   @UseTimeout()
-  testTimeout() {
-    // Se cancela si demora más de 3s
-    return new Promise((resolve) => setTimeout(() => resolve({ data: 'Timeout response' }), 5000));
+  async getWithTimeout() {
+    return new Promise((resolve) =>
+      setTimeout(() => resolve("Respuesta tardía"), 5000)
+    );
   }
 
-  @Get('fallback')
+  @Get("circuit")
+  @UseCircuitBreaker()
+  getWithCircuitBreaker() {
+    if (Math.random() < 0.7) {
+      throw new Error("Random Failure");
+    }
+    return "Success!";
+  }
+
+  @Get("fallback")
   @UseFallback()
-  testFallback() {
-    // Forzamos un error para probar fallback
-    throw new Error('Simulated error');
+  getWithFallback() {
+    throw new Error("Forzamos error para usar fallbackMethod");
   }
 }
+```
 
-
-	3.	(Opcional) Usa el ResilienceService para acceder a la configuración o centralizar lógica:
-
-import { Injectable } from '@nestjs/common';
-import { ResilienceService } from 'nestjs-resilience-lib';
-
-@Injectable()
-export class SomeCustomService {
-  constructor(private readonly resilienceService: ResilienceService) {}
-
-  doSomething() {
-    const circuitBreakerOpts = this.resilienceService.getCircuitBreakerOptions();
-    console.log('CircuitBreaker Timeout:', circuitBreakerOpts.timeout);
-
-    const retryOpts = this.resilienceService.getRetryOptions();
-    console.log('Max Retries:', retryOpts.maxRetries);
-    // ...
-  }
-}
-
-
-
-Configuración
-
-El objeto ResilienceModule.forRoot(...) recibe un ResilienceModuleOptions con las siguientes propiedades:
-	•	circuitBreaker:
-	•	enabled: booleano. Activa o desactiva el Circuit Breaker.
-	•	timeout: tiempo máximo (ms) para la operación envuelta (p. ej. 2000 ms).
-	•	errorThresholdPercentage: porcentaje de errores para abrir el circuito.
-	•	resetTimeout: tiempo (ms) para “half-open” después de abrirse el circuito.
-	•	retry:
-	•	enabled: booleano. Activa o desactiva reintentos.
-	•	maxRetries: número máximo de reintentos.
-	•	delayMs: tiempo (ms) de espera entre reintentos.
-	•	timeout:
-	•	enabled: booleano. Activa o desactiva el timeout.
-	•	timeoutMs: tiempo máximo (ms) que esperamos antes de cancelar.
-	•	fallback:
-	•	enabled: booleano. Activa o desactiva fallback.
-	•	fallbackMethod: función que retorna un valor alternativo cuando hay error.
-
-Ejemplo con forRootAsync
-
-ResilienceModule.forRootAsync({
-  useFactory: async () => {
-    // Podrías obtener variables de entorno, llamar a un servicio, etc.
-    return {
-      circuitBreaker: { enabled: true, timeout: 1000 },
-      retry: { enabled: true, maxRetries: 3, delayMs: 500 },
-      timeout: { enabled: true, timeoutMs: 3000 },
-      fallback: { enabled: true, fallbackMethod: () => 'Fallback data' },
-    };
-  },
-  inject: [],
-}),
-
-Extensiones y próximos pasos
-	•	Nuevos patrones: Puedes añadir Rate Limiting, Bulkhead, etc.
-	•	Test unitarios: Recomendado usar Jest para verificar fallas, timeouts, y aperturas de circuitos.
-	•	Observabilidad: Integra logs y métricas para monitorear cuántas veces se abre el circuito, cuántos reintentos ocurren, etc.
-
-Contribuciones
-
-¡Las PRs y sugerencias son bienvenidas! Por favor, abre un issue o PR en el repositorio oficial para discutir cualquier mejora.
-
-Licencia
-
-MIT
+> **Nota**: Cuando un patrón no está habilitado (`enabled: false`), el interceptor simplemente no hace nada.
 
 ---
 
-## Comentarios finales
+## ⚙️ Configuración detallada
 
-- El **`ResilienceService`** es un servicio adicional para facilitar el acceso y la manipulación de la configuración en tu aplicación.
-- No es obligatorio usarlo si prefieres inyectar directamente `RESILIENCE_OPTIONS` en cada interceptor o clase.
-- El **README** anterior es solo un **ejemplo**; personalízalo según tus necesidades, tu repositorio y tus enlaces.
-
-¡Con esto, deberías tener todo lo necesario para crear, documentar y publicar tu librería de resiliencia para NestJS!
+```typescript
+interface ResilienceModuleOptions {
+  circuitBreaker?: {
+    enabled?: boolean;
+    timeout?: number;
+    errorThresholdPercentage?: number;
+    resetTimeout?: number;
+  };
+  retry?: {
+    enabled?: boolean;
+    maxRetries?: number;
+    delayMs?: number;
+  };
+  timeout?: {
+    enabled?: boolean;
+    timeoutMs?: number;
+  };
+  fallback?: {
+    enabled?: boolean;
+    fallbackMethod?: () => any;
+  };
+}
 ```
+
+---
+
+## 🔗 Uso en cadena
+
+Puedes aplicar múltiples patrones, todos a la vez y simultáneamente con un solo decorador:
+
+```typescript
+@Get('all-patterns')
+@UseResilienceChain() // Aplica Timeout, Retry, Circuit Breaker, Fallback, etc.
+myEndpoint() {
+  // Lógica del endpoint
+}
+```
+
+O puedes habilitar los que desees usar de la siguiente manera:
+
+```typescript
+  @Get('timeout-retry')
+  @UseResilienceChain({ timeout: true, retry: true }) // Solo aplica Retry y TimeOut
+  getTimeoutAndRetry() {
+    return this.testService.mightFailRandomly();
+  }
+```
+
+---
+
+## 📡 Logs
+
+También puedes loggear la configuración inicial al arrancar la aplicación:
+
+```typescript
+  imports: [
+    ResilienceModule.forRoot({
+      logOnStartup: true, <- Para loguear apenas arranca
+      circuitBreaker: {
+        enabled: true,
+        timeout: 2000,
+        errorThresholdPercentage: 50,
+        resetTimeout: 3000,
+      },
+    }),
+  ],
+```
+
+---
+
+## 📜 Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Puedes usarlo libremente en entornos personales y comerciales.

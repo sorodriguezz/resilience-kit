@@ -22,6 +22,7 @@ export interface FallbackOptions {
 }
 
 export interface ResilienceModuleOptions {
+  logOnStartup?: boolean;
   circuitBreaker?: CircuitBreakerOptions;
   retry?: RetryOptions;
   timeout?: TimeoutOptions;

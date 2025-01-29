@@ -1,4 +1,3 @@
-// resilience-logger.service.ts
 import { Inject, Injectable, OnModuleInit, Logger } from "@nestjs/common";
 import { RESILIENCE_OPTIONS } from "./resilience.constants";
 import { ResilienceModuleOptions } from "./resilience.interfaces";
@@ -13,6 +12,10 @@ export class ResilienceLoggerService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
+    if (!this.options.logOnStartup) {
+      return;
+    }
+
     if (!this.options) {
       this.logger.warn("No resilience config provided");
       return;
