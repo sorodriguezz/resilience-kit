@@ -3,10 +3,10 @@
 </p>
 
 <p align="center">
-    <a href='https://img.shields.io/npm/l/nestjs-resilience'><img src="https://img.shields.io/npm/l/nestjs-resilience" alt="MIT License" /></a>
+    <a href='https://img.shields.io/npm/l/resilience-kit'><img src="https://img.shields.io/npm/l/resilience-kit" alt="MIT License" /></a>
 </p>
 
-**NestJS Resilience** proporciona **patrones de resiliencia** como Circuit Breaker, Retry, Timeout y Fallback para **NestJS** (y Node.js). Permite configurar y aplicar estos patrones de forma sencilla mediante **interceptores**, **decoradores** y un **módulo dinámico**.
+**Resilience Kit** proporciona **patrones de resiliencia** como Circuit Breaker, Retry, Timeout y Fallback para **NestJS** (y Node.js). Permite configurar y aplicar estos patrones de forma sencilla mediante **interceptores**, **decoradores** y un **módulo dinámico**.
 
 ## 🚀 Características principales
 
@@ -23,13 +23,13 @@
 ## 📦 Instalación
 
 ```bash
-npm install nestjs-resilience
+npm install resilience-kit
 ```
 
 O usando Yarn:
 
 ```bash
-yarn add nestjs-resilience
+yarn add resilience-kit
 ```
 
 ### Requisitos
@@ -47,7 +47,7 @@ En tu `AppModule` (o el módulo donde lo necesites), importa `ResilienceModule` 
 
 ```typescript
 import { Module } from "@nestjs/common";
-import { ResilienceModule } from "nestjs-resilience";
+import { ResilienceModule } from "resilience-kit";
 
 @Module({
   imports: [
@@ -101,7 +101,7 @@ import {
   UseRetry,
   UseTimeout,
   UseFallback,
-} from "nestjs-resilience";
+} from "resilience-kit";
 
 @Controller("demo")
 export class DemoController {
