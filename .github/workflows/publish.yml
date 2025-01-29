@@ -13,6 +13,18 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      - name: Debug token length
+        run: |
+          echo "NPM_TOKEN length: ${#NPM_TOKEN}"
+          echo "$NPM_TOKEN" | shasum
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check who am I
+        run: npm whoami || echo "Not logged in"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
