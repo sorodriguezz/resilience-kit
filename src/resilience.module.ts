@@ -1,6 +1,7 @@
 import { Module, DynamicModule, Provider } from '@nestjs/common';
 import { ResilienceModuleOptions } from './resilience.interfaces';
 import { RESILIENCE_OPTIONS } from './resilience.constants';
+import { ResilienceLoggerService } from './resilience-logger.service';
 
 @Module({})
 export class ResilienceModule {
@@ -10,6 +11,7 @@ export class ResilienceModule {
         provide: RESILIENCE_OPTIONS,
         useValue: options,
       },
+      ResilienceLoggerService,
     ];
 
     return {
@@ -30,6 +32,7 @@ export class ResilienceModule {
         useFactory: asyncOptions.useFactory,
         inject: asyncOptions.inject || [],
       },
+      ResilienceLoggerService,
     ];
 
     return {

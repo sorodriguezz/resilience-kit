@@ -27,3 +27,10 @@ export interface ResilienceModuleOptions {
   timeout?: TimeoutOptions;
   fallback?: FallbackOptions;
 }
+
+export interface ResilienceChainOptions {
+  circuitBreaker?: boolean;
+  retry?: boolean;
+  timeout?: boolean;
+  fallback?: boolean;
+}

@@ -1,16 +1,37 @@
 {
   "name": "nestjs-resilience",
   "version": "0.0.1",
-  "description": "Un módulo para mejorar la confiabilidad y la tolerancia a fallas de sus aplicaciones NestJS",
-  "main": "index.js",
-  "scripts": {},
-  "author": "sorodriguezz",
-  "license": "MIT",
-  "dependencies": {
+  "description": "Módulo para mejorar la confiabilidad y la tolerancia a fallas de sus aplicaciones",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "npx tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
     "@nestjs/common": "^11.0.6",
+    "rxjs": "^7.8.1"
+  },
+  "dependencies": {
     "opossum": "^8.4.0"
   },
   "devDependencies": {
-    "@types/opossum": "^8.1.8"
-  }
+    "@nestjs/cli": "^11.0.2",
+    "@types/opossum": "^8.1.8",
+    "typescript": "^5.7.3"
+  },
+  "keywords": [
+    "nestjs",
+    "resilience",
+    "retry",
+    "circuit-breaker",
+    "timeout",
+    "fallback"
+  ],
+  "author": "sorodriguezz",
+  "license": "MIT"
 }
