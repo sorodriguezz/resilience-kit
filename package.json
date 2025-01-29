@@ -1,6 +1,6 @@
 {
   "name": "resilience-kit",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Módulo para mejorar la confiabilidad y la tolerancia a fallas de sus aplicaciones",
   "main": "dist/index.js",
   "module": "dist/index.js",
