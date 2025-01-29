@@ -1,0 +1,16 @@
+{
+  "name": "nestjs-resilience",
+  "version": "0.0.1",
+  "description": "Un módulo para mejorar la confiabilidad y la tolerancia a fallas de sus aplicaciones NestJS",
+  "main": "index.js",
+  "scripts": {},
+  "author": "sorodriguezz",
+  "license": "MIT",
+  "dependencies": {
+    "@nestjs/common": "^11.0.6",
+    "opossum": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/opossum": "^8.1.8"
+  }
+}
