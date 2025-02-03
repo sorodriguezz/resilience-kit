@@ -9,7 +9,7 @@ export class FallbackService {
     if (this.options.fallbackMethod) {
       return this.options.fallbackMethod();
     }
-    return { message: "Default fallback response" };
+    return { message: "Default fallback" };
   }
 
   async executeWithFallback<T>(fn: () => Promise<T>): Promise<T | any> {
