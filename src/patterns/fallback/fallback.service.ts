@@ -11,4 +11,12 @@ export class FallbackService {
     }
     return { message: "Default fallback response" };
   }
+
+  async executeWithFallback<T>(fn: () => Promise<T>): Promise<T | any> {
+    try {
+      return await fn();
+    } catch (error) {
+      return this.executeFallback();
+    }
+  }
 }

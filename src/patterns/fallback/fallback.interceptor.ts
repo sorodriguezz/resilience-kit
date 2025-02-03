@@ -5,7 +5,7 @@ import {
   NestInterceptor,
   Inject,
 } from "@nestjs/common";
-import { Observable, catchError, of } from "rxjs";
+import { Observable, catchError, from, lastValueFrom, of } from "rxjs";
 import { RESILIENCE_OPTIONS } from "../../resilience.constants";
 import {
   ResilienceModuleOptions,
@@ -34,11 +34,10 @@ export class FallbackInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    return next.handle().pipe(
-      catchError((error) => {
-        const fallbackValue = this.fallbackService!.executeFallback();
-        return of(fallbackValue);
-      })
+    return from(
+      this.fallbackService.executeWithFallback(() =>
+        lastValueFrom(next.handle())
+      )
     );
   }
 }
