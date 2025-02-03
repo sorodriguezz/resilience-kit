@@ -200,6 +200,50 @@ También puedes loggear la configuración inicial al arrancar la aplicación:
   ],
 ```
 
+## 🔍 Ver configuraciones
+
+Puedes ver las configuraciones según un patrón a través del servicio, de la siguiente manera:
+
+```typescript
+Module({
+  imports: [
+    ResilienceModule.forRoot({
+      fallback: {
+        enabled: true,
+        fallbackMethod: sayHello,
+      },
+    }),
+  ],
+  providers: [ResilienceService], // Proveer el servicio
+})
+```
+
+Para utilizarlo dentro de la aplicación, se inyecta en el constructor y se utiliza de la siguiente manera:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { ResilienceService } from 'resilience-kit';
+
+export class AppService {
+  private attemptCount = 0;
+
+  constructor(private readonly resilienceService: ResilienceService) {}
+
+  alwaysFails() {
+    console.log(this.rs.getCircuitBreakerOptions()); // Obtiene en fallback
+    throw new Error('I always fail!');
+  }
+
+  /** output:
+    {
+      enabled: true,
+      errorThresholdPercentage: 50,
+      resetTimeout: 5000,
+      timeout: 1000
+    }
+   * /
+```
+
 ## 📌 Uso básico en NodeJS con Express
 
 1️⃣ Importa **resilience kit** en tu proyecto usando el patron que quieras y con la configuración que quieras:
